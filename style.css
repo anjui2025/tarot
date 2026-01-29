@@ -1,0 +1,585 @@
+/* =========================================
+   目錄 (Table of Contents)
+   1. 全局變數與重置 (Variables & Reset)
+   2. 通用元件 (Buttons, Inputs, Toggles)
+   3. 結構佈局 (Phase Containers, Header, Footer)
+   4. 首頁與呼吸儀式 (Landing & Breath)
+   5. 設定意圖頁面 (Setup Phase)
+   6. 核心牌桌與卡牌樣式 (Board & Cards)
+   7. 補牌區域 (Supplement Area)
+   8. 結果解構區 (Result Panel Grid)
+   9. 燈箱與RWD手機微調 (Modal & Mobile)
+   10. 電腦版幾何排版與防重疊 (Desktop Logic) ★重要修改區★
+   ========================================= */
+
+/* =========================================
+   1. 全局變數與重置 (Variables & Reset)
+   ========================================= */
+:root {
+    --bg-color: #050505;
+    --text-gold: #d4af37;
+    --text-dim: #888;
+    --text-white: #e0e0e0;
+    
+    /* 預設卡牌尺寸 */
+    --card-width: 150px;
+    --card-height: 260px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-white);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    overflow-x: hidden;
+    font-size: 16px; 
+    line-height: 1.6;
+}
+
+/* =========================================
+   2. 通用元件 (Buttons, Inputs, Toggles)
+   ========================================= */
+/* 按鈕 */
+.btn {
+    border: 1px solid var(--text-gold);
+    background: rgba(212, 175, 55, 0.05);
+    color: var(--text-gold);
+    padding: 12px 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1.5px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    display: inline-block;
+    border-radius: 4px;
+}
+.btn:hover {
+    background: var(--text-gold);
+    color: #000;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* 輸入框 */
+input[type="text"] {
+    background: transparent; border: none; border-bottom: 1px solid #444;
+    color: #fff; font-size: 1.2rem; padding: 10px;
+    width: 100%; max-width: 500px; text-align: center;
+    margin: 0 auto 50px auto; display: block;
+    transition: border-color 0.3s;
+}
+input[type="text"]:focus { outline: none; border-color: var(--text-gold); }
+
+/* 滑桿 (Slider) */
+.slider-container { width: 100%; margin: 15px 0; }
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; height: 16px; width: 16px;
+    border-radius: 50%; background: var(--text-gold);
+    cursor: pointer; margin-top: -6px;
+}
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #444; border-radius: 2px; }
+
+.custom-btn {
+    border: 1px solid #555; color: #ccc; background: transparent;
+    padding: 8px 20px; font-size: 0.9rem; cursor: pointer;
+    width: 100%; margin-top: 10px;
+}
+.custom-btn:hover { border-color: var(--text-gold); color: var(--text-gold); }
+
+/* 開關 (Toggle Switch) */
+.setup-controls {
+    display: flex; justify-content: center; gap: 40px;
+    margin-bottom: 40px; width: 100%;
+}
+.control-item { display: flex; align-items: center; gap: 12px; }
+.switch-label { color: var(--text-dim); font-size: 0.9rem; letter-spacing: 1px; }
+
+.switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider-round {
+    position: absolute; cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #222; transition: .4s;
+    border-radius: 24px; border: 1px solid #444;
+}
+.slider-round:before {
+    position: absolute; content: ""; height: 16px; width: 16px;
+    left: 3px; bottom: 3px; background-color: var(--text-dim);
+    transition: .4s; border-radius: 50%;
+}
+input:checked + .slider-round { background-color: rgba(212, 175, 55, 0.1); border-color: var(--text-gold); }
+input:checked + .slider-round:before { transform: translateX(22px); background-color: var(--text-gold); box-shadow: 0 0 8px var(--text-gold); }
+
+/* =========================================
+   3. 結構佈局 (Phase Containers, Header, Footer)
+   ========================================= */
+.phase-container {
+    display: none; width: 100%; max-width: 1200px;
+    flex: 1; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.6s ease; margin: auto; padding: 40px 20px;
+}
+.phase-container.active { display: flex; opacity: 1; }
+#phase-setup.active { justify-content: flex-start; padding-top: 60px; }
+#phase-reveal.active { justify-content: flex-start; padding-top: 40px; }
+
+.global-footer {
+    width: 100%; padding: 30px 0; background-color: #080808;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 15px; font-size: 0.85rem; color: #555;
+    border-top: 1px solid #1a1a1a; margin-top: auto;
+    z-index: 20; position: relative;
+}
+.social-links { display: flex; gap: 20px; }
+.social-link { color: #666; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
+.social-link:hover { color: var(--text-gold); }
+
+/* =========================================
+   4. 首頁與呼吸儀式 (Landing & Breath)
+   ========================================= */
+.landing-content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1000px; }
+.landing-banner { width: 100%; max-width: 320px; aspect-ratio: 1/1; margin-bottom: 30px; display: flex; justify-content: center; align-items: center; }
+.landing-banner img { width: 100%; height: 100%; object-fit: contain; }
+.landing-text-group { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+.brand-title {
+    font-size: 2.2rem; letter-spacing: 4px; color: var(--text-gold);
+    margin-bottom: 5px; text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(212,175,55,0.2);
+}
+.brand-subtitle { font-size: 1rem; color: var(--text-dim); margin-bottom: 30px; letter-spacing: 2px; }
+.instructions { color: #ccc; margin-bottom: 30px; font-size: 0.95rem; width: 100%; max-width: 550px; line-height: 1.8; }
+.disclaimer-box {
+    border: 1px solid #222; background: rgba(255, 255, 255, 0.03);
+    padding: 20px; font-size: 0.85rem; color: var(--text-dim);
+    margin-bottom: 30px; width: 100%; max-width: 550px;
+    line-height: 1.6; text-align: justify;
+}
+
+@media (min-width: 900px) {
+    .landing-content { flex-direction: row; gap: 80px; }
+    .landing-banner { margin-bottom: 0; max-width: 400px; }
+    .landing-text-group { align-items: flex-start; text-align: left; }
+    .brand-title, .brand-subtitle, .instructions { text-align: left; }
+}
+
+/* 呼吸燈 */
+.breath-wrapper { height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.breathing-light {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,175,55,0.6) 0%, rgba(0,0,0,0) 70%);
+    box-shadow: 0 0 20px var(--text-gold);
+    animation: deepBreath 4s infinite ease-in-out; margin-bottom: 40px;
+}
+@keyframes deepBreath {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.6); opacity: 1; box-shadow: 0 0 60px var(--text-gold); }
+}
+.meditate-text { color: var(--text-gold); font-size: 1.1rem; letter-spacing: 2px; animation: fadeInOut 4s infinite; }
+@keyframes fadeInOut { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+.skip-btn { background: transparent; border: none; color: #444; font-size: 0.8rem; margin-top: 40px; cursor: pointer; text-decoration: underline; }
+
+/* =========================================
+   5. 設定意圖頁面 (Setup Phase)
+   ========================================= */
+.spread-selection-area { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 40px; margin: 0 auto; }
+.spread-category { width: 100%; border-top: 1px solid #222; padding-top: 20px; }
+.cat-title {
+    color: var(--text-gold); font-size: 1.1rem; margin-bottom: 20px;
+    font-weight: 300; letter-spacing: 2px; text-align: center; width: 100%; display: inline-block;
+}
+.spread-grid {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 15px; width: 100%;
+}
+.spread-btn {
+    background: #111; border: 1px solid #333; padding: 20px 10px;
+    color: #ccc; cursor: pointer; transition: all 0.3s; border-radius: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 200px; min-height: 110px; flex-grow: 0;
+}
+.spread-btn:hover {
+    border-color: var(--text-gold); background: #1a1a1a;
+    transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.s-name { font-size: 1rem; font-weight: bold; margin-bottom: 8px; color: var(--text-white); }
+.s-desc { font-size: 0.85rem; color: #666; line-height: 1.3; }
+
+/* --- 情緒導航標籤 --- */
+.emotion-tags-container {
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.tags-title {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.tags-wrapper {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tag-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tag-btn:hover {
+    border-color: var(--text-gold);
+    color: var(--text-gold);
+}
+
+.tag-btn.active {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--text-gold);
+    color: var(--text-gold);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+/* --- 篩選時的淡化效果 --- */
+.spread-btn.dimmed {
+    opacity: 0.2;
+    filter: grayscale(100%);
+    pointer-events: none; /* 讓被過濾掉的按鈕不能點 */
+}
+
+/* =========================================
+   6. 核心牌桌與卡牌樣式 (Board & Cards)
+   ========================================= */
+.instruction-text {
+    color: var(--text-gold); margin-bottom: 20px;
+    font-size: 1rem; animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,0.3); } }
+#hint-text {
+    background: rgba(0,0,0,0.8); padding: 10px 20px;
+    border-radius: 20px; border: 1px solid #333;
+    display: inline-block; line-height: 1.6;
+}
+
+/* 預設容器：網格流體排列 (Mobile First) */
+.cards-container {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 15px; width: 100%; max-width: 1200px;
+    padding-bottom: 40px; position: relative;
+}
+
+/* 卡牌 Wrapper */
+.card-wrapper {
+    width: var(--card-width); height: var(--card-height);
+    position: relative; transform-style: preserve-3d;
+    transition: transform 0.6s, opacity 0.5s;
+    cursor: pointer; flex-shrink: 0;
+}
+.card-wrapper.flipped { transform: rotateY(180deg); }
+
+/* 卡牌正反面 */
+.face {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; border-radius: 6px;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    border: 1px solid #333; overflow: hidden; background: #000;
+}
+.face.back {
+    background: #151515;
+    background-image: radial-gradient(#333 1px, transparent 1px);
+    background-size: 10px 10px;
+    border: 1px solid var(--text-gold);
+    justify-content: center; align-items: center;
+}
+.face.back::after { content: "✦"; font-size: 3rem; color: var(--text-gold); opacity: 0.8; }
+.face.front { transform: rotateY(180deg); border: 1px solid var(--text-gold); padding: 0; }
+
+/* 卡牌內部元素 */
+.card-position-label {
+    width: 100%; background: #1a1a1a; color: var(--text-gold);
+    font-size: 0.75rem; text-align: center; padding: 4px 0;
+    border-bottom: 1px solid #333; font-weight: bold;
+}
+.card-img-container {
+    width: 100%; flex: 1; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; background: #080808; padding: 5px;
+}
+.card-img-container img { width: 100%; height: 100%; object-fit: contain; }
+.card-title { color: #fff; font-size: 0.95rem; font-weight: bold; margin: 5px 0 2px 0; width: 100%; text-align: center; }
+.card-status { font-size: 0.75rem; color: #888; margin-bottom: 4px; }
+.card-keywords {
+    font-size: 0.7rem; color: #aaa; line-height: 1.2;
+    padding: 0 8px 8px 8px; text-align: center;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* 虛線框 (Placeholder) */
+.card-wrapper.placeholder {
+    border: 2px dashed #444; background: rgba(255, 255, 255, 0.02);
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; box-shadow: none;
+}
+.card-wrapper.placeholder:hover { border-color: var(--text-gold); background: rgba(212, 175, 55, 0.05); }
+.placeholder-label { color: #666; font-size: 0.85rem; text-align: center; padding: 10px; pointer-events: none; letter-spacing: 1px; }
+
+/* =========================================
+   7. 補牌區域 (Supplement Area)
+   ========================================= */
+.supplement-container {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 15px; width: 100%; max-width: 1200px;
+    margin-top: 40px; padding-bottom: 20px;
+    border-top: 1px dashed #333; padding-top: 20px;
+}
+.supplement-container:not(:empty)::before {
+    content: "✦ 補充指引牌 ✦"; display: block; width: 100%;
+    text-align: center; color: var(--text-dim); font-size: 0.9rem;
+    margin-bottom: 15px; letter-spacing: 2px;
+}
+
+/* =========================================
+   8. 結果解構區 (Result Panel Grid)
+   ========================================= */
+.result-actions {
+    width: 100%; max-width: 930px; background: #111;
+    padding: 25px; border: 1px solid var(--text-gold);
+    text-align: left; margin-top: 20px; margin-bottom: 40px;
+    opacity: 0; transition: opacity 1s; z-index: 10; position: relative;
+}
+
+#result-panel {
+    width: 100%; max-width: 930px;
+    margin: 30px auto; padding: 30px;
+}
+#result-desc {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; margin-bottom: 30px;
+}
+.result-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #333; border-left: 3px solid var(--text-gold);
+    border-radius: 8px; padding: 15px; transition: transform 0.2s;
+}
+.result-item:hover {
+    background: rgba(255, 255, 255, 0.06); transform: translateY(-2px);
+}
+
+/* =========================================
+   9. 燈箱與RWD手機微調 (Modal & Mobile)
+   ========================================= */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.95); z-index: 2000;
+    justify-content: center; align-items: center; flex-direction: column; padding: 20px;
+}
+.modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+.modal-img { max-width: 90vw; max-height: 70vh; border: 1px solid var(--text-gold); border-radius: 8px; margin-bottom: 15px; }
+.modal-caption { color: var(--text-gold); font-size: 1.2rem; text-align: center; }
+.modal-close-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; color: #fff; cursor: pointer; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+/* 手機版 RWD 調整 */
+@media (max-width: 1023px) {
+    :root { --card-width: 120px; --card-height: 210px; }
+    .spread-grid { grid-template-columns: repeat(2, 1fr); }
+    .cards-container { gap: 8px; height: auto !important; display: flex !important; }
+    
+    /* 強制手機版卡牌使用相對定位，不走幾何圖形 */
+    .card-wrapper {
+        position: relative !important; top: auto !important; left: auto !important;
+        transform: none !important; margin: 0 !important;
+    }
+    .card-wrapper.flipped { transform: rotateY(180deg) !important; }
+    
+    /* 結果面板在手機上改回單欄 */
+    #result-desc { grid-template-columns: 1fr; }
+}
+
+/* =========================================
+   10. 電腦版幾何排版與防重疊 (Desktop Logic)
+   ★ 包含 min-height 解決方案
+   ========================================= */
+@media (min-width: 1024px) {
+
+    /* --- 通用容器設定：轉為 Absolute Positioning 畫布 --- */
+    .cards-container {
+        display: block; /* 停用 Flex */
+        width: 1000px;
+        margin: 0 auto;
+        
+        /* ★ 解決方案：設定基礎最小高度，避免與下方內容重疊 ★ */
+        min-height: 600px; 
+        position: relative;
+    }
+    
+    /* --- 針對特高牌陣，強制撐開更大的空間 --- */
+    .cards-container.spread-celtic,
+    .cards-container.spread-tree_of_life,
+    .cards-container.spread-astrological,
+    .cards-container.spread-yearly {
+        min-height: 950px; /* 足夠容納占星宮位圓盤的高度 */
+    }
+
+    /* 讓所有牌先絕對定位到中心，再個別移動 */
+    .card-wrapper {
+        position: absolute;
+        top: 50%; left: 50%;
+        margin-left: calc(var(--card-width) / -2);
+        margin-top: calc(var(--card-height) / -2);
+        transition: transform 0.6s ease;
+    }
+    .card-wrapper.flipped { transform: rotateY(180deg); }
+
+    /* --- 各牌陣座標定義 --- */
+    
+    /* 1. 單張 */
+    .spread-single .pos-0 { transform: scale(1.2); }
+    .spread-single .pos-0.flipped { transform: scale(1.2) rotateY(180deg); }
+
+    /* 2. 聖三角 */
+    .spread-triangle_time .pos-0, .spread-triangle_bms .pos-0, .spread-triangle_advice .pos-0 { top: 25%; }
+    .spread-triangle_time .pos-1, .spread-triangle_bms .pos-1, .spread-triangle_advice .pos-1 { top: 60%; left: 35%; }
+    .spread-triangle_time .pos-2, .spread-triangle_bms .pos-2, .spread-triangle_advice .pos-2 { top: 60%; left: 65%; }
+
+    /* 3. 鑽石 */
+    .spread-diamond .pos-0 { left: 35%; top: 50%; }
+    .spread-diamond .pos-1 { left: 50%; top: 25%; }
+    .spread-diamond .pos-2 { left: 50%; top: 75%; }
+    .spread-diamond .pos-3 { left: 65%; top: 50%; }
+
+    /* 4. 要素矩陣 */
+    .spread-elemental .pos-0 { top: 50%; left: 50%; z-index: 2; }
+    .spread-elemental .pos-1 { top: 25%; left: 50%; }
+    .spread-elemental .pos-2 { top: 50%; left: 70%; }
+    .spread-elemental .pos-3 { top: 75%; left: 50%; }
+    .spread-elemental .pos-4 { top: 50%; left: 30%; }
+
+    /* 5. 二選一 */
+    .spread-choice .pos-0 { top: 75%; left: 50%; }
+    .spread-choice .pos-1 { top: 50%; left: 35%; }
+    .spread-choice .pos-2 { top: 25%; left: 25%; }
+    .spread-choice .pos-3 { top: 50%; left: 65%; }
+    .spread-choice .pos-4 { top: 25%; left: 75%; }
+
+    /* 6. 六芒星 */
+    .spread-hexagram .pos-0 { top: 20%; left: 50%; }
+    .spread-hexagram .pos-1 { top: 80%; left: 50%; }
+    .spread-hexagram .pos-2 { top: 35%; left: 75%; }
+    .spread-hexagram .pos-3 { top: 35%; left: 25%; }
+    .spread-hexagram .pos-4 { top: 65%; left: 75%; }
+    .spread-hexagram .pos-5 { top: 65%; left: 25%; }
+    .spread-hexagram .pos-6 { top: 50%; left: 50%; z-index: 5; box-shadow: 0 0 20px var(--text-gold); }
+
+    /* 7. 馬蹄鐵 */
+    .spread-horseshoe .pos-0 { top: 70%; left: 20%; }
+    .spread-horseshoe .pos-1 { top: 45%; left: 25%; }
+    .spread-horseshoe .pos-2 { top: 25%; left: 35%; }
+    .spread-horseshoe .pos-3 { top: 20%; left: 50%; }
+    .spread-horseshoe .pos-4 { top: 25%; left: 65%; }
+    .spread-horseshoe .pos-5 { top: 45%; left: 75%; }
+    .spread-horseshoe .pos-6 { top: 70%; left: 80%; }
+
+    /* 8. 維納斯 */
+    .spread-venus .pos-0 { top: 30%; left: 25%; }
+    .spread-venus .pos-1 { top: 30%; left: 75%; }
+    .spread-venus .pos-2 { top: 20%; left: 50%; }
+    .spread-venus .pos-3 { top: 50%; left: 25%; }
+    .spread-venus .pos-4 { top: 50%; left: 75%; }
+    .spread-venus .pos-5 { top: 40%; left: 50%; }
+    .spread-venus .pos-6 { top: 60%; left: 50%; }
+    .spread-venus .pos-7 { top: 80%; left: 50%; }
+
+    /* 9. 生命之樹 (座標整體下移修正) */
+    /* 第一層：Kether */
+    .spread-tree_of_life .pos-0 { top: 16%; left: 50%; } /* 原本 10% -> 改 18% */
+    
+    /* 中軸線 */
+    .spread-tree_of_life .pos-5 { top: 52%; left: 50%; } /* 原本 50% -> 改 54% */
+    .spread-tree_of_life .pos-8 { top: 72%; left: 50%; } /* 原本 70% -> 改 74% */
+    .spread-tree_of_life .pos-9 { top: 90%; left: 50%; } /* 原本 90% -> 改 92% */
+    
+    /* 右柱 (慈悲之柱) */
+    .spread-tree_of_life .pos-1 { top: 30%; left: 75%; } /* 原本 25% -> 改 30% */
+    .spread-tree_of_life .pos-3 { top: 44%; left: 75%; } /* 原本 40% -> 改 44% */
+    .spread-tree_of_life .pos-6 { top: 64%; left: 75%; } /* 原本 60% -> 改 64% */
+    
+    /* 左柱 (嚴厲之柱) */
+    .spread-tree_of_life .pos-2 { top: 30%; left: 25%; } /* 同上 */
+    .spread-tree_of_life .pos-4 { top: 44%; left: 25%; } /* 同上 */
+    .spread-tree_of_life .pos-7 { top: 64%; left: 25%; } /* 同上 */
+
+    /* 10. 賽爾特十字 (已透過上方 min-height: 950px 撐開容器) */
+    .spread-celtic .pos-0 { top: 50%; left: 40%; z-index: 2; }
+    .spread-celtic .pos-1 { top: 50%; left: 40%; z-index: 3; transform: rotate(90deg); }
+    .spread-celtic .pos-1.flipped { transform: rotate(90deg) rotateY(180deg); }
+    .spread-celtic .pos-2 { top: 75%; left: 40%; }
+    .spread-celtic .pos-3 { top: 50%; left: 20%; }
+    .spread-celtic .pos-4 { top: 25%; left: 40%; }
+    .spread-celtic .pos-5 { top: 50%; left: 60%; }
+    .spread-celtic .pos-6 { top: 85%; left: 80%; }
+    .spread-celtic .pos-7 { top: 65%; left: 80%; }
+    .spread-celtic .pos-8 { top: 45%; left: 80%; }
+    .spread-celtic .pos-9 { top: 25%; left: 80%; }
+
+    /* 11. 占星宮位 (已透過上方 min-height: 950px 撐開容器) */
+    .spread-astrological .card-wrapper {
+        transform: rotate(calc(var(--i) * 30deg - 90deg)) translate(320px) rotate(calc(var(--i) * -30deg + 90deg));
+    }
+    .spread-astrological .card-wrapper.flipped {
+        transform: rotate(calc(var(--i) * 30deg - 90deg)) translate(320px) rotate(calc(var(--i) * -30deg + 90deg)) rotateY(180deg);
+    }
+
+    /* 12. 年度運勢 (Grid + Center) */
+    .cards-container.spread-yearly {
+        display: grid; 
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px; 
+        align-content: start; /* 改為 start 避免垂直過度分散 */
+        justify-items: center; /* ★ 關鍵修正：讓卡片在格子內水平置中 */
+        width: 1000px;
+        padding-top: 60px; /* ★ 增加頂部空間，讓標題不壓迫 */
+    }
+    .spread-yearly .card-wrapper { position: static; transform: none; margin: 0; }
+    .spread-yearly .card-wrapper.flipped { transform: rotateY(180deg); }
+    .spread-yearly .pos-12 {
+        grid-column: 1 / -1; justify-self: center;
+        margin-top: 30px; border: 2px solid var(--text-gold);
+    }
+
+    /* --- 自由抽牌模式 (取消絕對定位，改回 Flow) --- */
+    .cards-container.spread-custom {
+        display: flex !important; flex-wrap: wrap;
+        justify-content: center; align-items: center;
+        gap: 20px; min-height: auto; height: auto;
+    }
+    .spread-custom .card-wrapper {
+        position: relative !important; top: auto !important; left: auto !important;
+        margin: 0 !important; transform: none !important;
+    }
+    .spread-custom .card-wrapper.flipped { transform: rotateY(180deg) !important; }
+
+    /* --- 補牌區域 (取消絕對定位，防止與主牌陣重疊) --- */
+    .supplement-container .card-wrapper {
+        position: relative !important; top: auto !important; left: auto !important;
+        margin: 0 !important; transform: none !important;
+    }
+    .supplement-container .card-wrapper.flipped { transform: rotateY(180deg) !important; }
+}

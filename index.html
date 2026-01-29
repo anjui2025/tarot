@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caramel Unit | 塔羅工具</title>
+    <link rel="icon" href="img/s-logo.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+    <div id="image-modal" class="modal-overlay" onclick="closeModal(event)">
+        <span class="modal-close-btn" onclick="closeModalDirect()">&times;</span>
+        <div class="modal-content-wrapper">
+            <img id="modal-img" class="modal-img" src="" alt="Zoomed Tarot">
+        </div>
+        <div id="modal-caption" class="modal-caption"></div>
+    </div>
+
+    <div id="phase-landing" class="phase-container active">
+        <div class="landing-content">
+            <div class="landing-banner">
+                <img src="img/landing-main2.png" alt="Caramel Unit Tarot">
+            </div>
+            
+            <div class="landing-text-group">
+                <div class="brand-title">Caramel Unit | 塔羅牌工具</div>
+                <div class="brand-subtitle">情緒零件解構 ‧ 內在能量重組</div>
+
+                <div class="instructions">
+                    <p>
+                        對我來說，塔羅牌與其說是占卜，更像是與自己對話的工具。<br>
+                        幫助我釐清混亂的思緒，在徬徨無助時給予方向與安定感。<br>
+                        在自我探索的路上，它提供我不同的視角，<br>
+                        也希望這個工具能在此刻幫助到你。
+                    </p>
+                </div>
+
+                <div class="disclaimer-box">
+                    <strong>覺察聲明：</strong>這不是命運的宣判，而是與潛意識的對談。本工具旨在自我探索，無法替代專業建議。改變流向的鑰匙，始終掌握在您的行動中。
+                </div>
+
+                <button class="btn" onclick="goToPhase('phase-setup')">開始對話</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="global-footer">
+        <div class="footer-text">Caramel Unit 出品</div>
+        <div class="social-links">
+            <a href="https://anjui2025.github.io/caramel.unit/" target="_blank" class="social-link">
+                <i class="bi bi-globe"></i> Website
+            </a>
+            <a href="https://line.me/R/ti/p/@095xzwqa" target="_blank" class="social-link">
+                <i class="bi bi-line"></i> Line
+            </a>
+            <a href="https://www.linkedin.com/in/aj0920/" target="_blank" class="social-link">
+                <i class="bi bi-linkedin"></i> LinkedIn
+            </a>
+        </div>
+    </footer>
+
+    <div id="phase-setup" class="phase-container">
+        <h2 style="color: var(--text-gold); font-weight: 300; margin-bottom: 10px;">設定意圖與牌陣</h2>
+        <div class="brand-subtitle" style="margin-bottom: 30px;">
+            請輸入問題，並選擇最適合當下情境的解構模型
+        </div>
+        
+        <input type="text" id="question" placeholder="在此輸入想釐清的問題或當下感受...">
+
+            <div class="setup-controls">
+                <div class="control-item">
+                    <label class="switch-label">使用 22 張大牌</label>
+                    <label class="switch">
+                        <input type="checkbox" id="major-only" onchange="toggleMajorOnly(this.checked)">
+                        <span class="slider-round"></span>
+                    </label>
+                </div>
+
+                <div class="control-item">
+                    <label class="switch-label">僅使用正位</label>
+                    <label class="switch">
+                        <input type="checkbox" id="upright-only" onchange="toggleUprightOnly(this.checked)">
+                        <span class="slider-round"></span>
+                    </label>
+                </div>
+            </div>
+
+        <div class="spread-selection-area">
+            
+            <div class="emotion-tags-container">
+                <div class="tags-title">當下的心理狀態是...</div>
+                <div class="tags-wrapper">
+                    <button class="tag-btn" onclick="filterSpreads('anxiety')">🤯 內耗焦慮</button>
+                    <button class="tag-btn" onclick="filterSpreads('relationship')">❤️ 情感關係</button>
+                    <button class="tag-btn" onclick="filterSpreads('confusion')">🌫️ 迷惘卡關</button>
+                    <button class="tag-btn" onclick="filterSpreads('deep')">🧘 深層靈性</button>
+                    <button class="tag-btn active" onclick="filterSpreads('all')">✨ 全部顯示</button>
+                </div>
+            </div>
+
+            <div class="spread-category">
+                <h3 class="cat-title">基礎指引</h3>
+                <div class="spread-grid">
+                    <button class="spread-btn" onclick="initiateRitual('single')" data-tags="confusion anxiety">
+                        <div class="s-name">單張指引</div>
+                        <div class="s-desc">提取當下核心能量切片 (1張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('triangle_time')" data-tags="confusion">
+                        <div class="s-name">聖三角 (時間)</div>
+                        <div class="s-desc">解構時間軸：成因、現狀與流向 (3張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('triangle_bms')" data-tags="anxiety deep">
+                        <div class="s-name">聖三角 (身心靈)</div>
+                        <div class="s-desc">掃描內在圖層：身、心、靈協作狀態 (3張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('triangle_advice')" data-tags="confusion anxiety">
+                        <div class="s-name">聖三角 (建議)</div>
+                        <div class="s-desc">策略分析：現狀、阻礙與突破點 (3張)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="spread-category">
+                <h3 class="cat-title">進階分析</h3>
+                <div class="spread-grid">
+                    <button class="spread-btn" onclick="initiateRitual('diamond')" data-tags="confusion anxiety">
+                        <div class="s-name">鑽石牌陣</div>
+                        <div class="s-desc">壓力模型：內在資源 vs 外在困境 (4張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('elemental')" data-tags="deep anxiety">
+                        <div class="s-name">要素矩陣</div>
+                        <div class="s-desc">元素平衡：拆解地水火風能量佔比 (5張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('choice')" data-tags="confusion relationship">
+                        <div class="s-name">二選一牌陣</div>
+                        <div class="s-desc">路徑模擬：平行宇宙的發展預覽 (5張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('hexagram')" data-tags="confusion">
+                        <div class="s-name">六芒星牌陣</div>
+                        <div class="s-desc">環境評估：周遭變數與成功率演算 (7張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('horseshoe')" data-tags="confusion">
+                        <div class="s-name">馬蹄鐵牌陣</div>
+                        <div class="s-desc">行動推演：從過去到策略的演變路徑 (7張)</div>
+                    </button>
+                     <button class="spread-btn" onclick="initiateRitual('venus')" data-tags="relationship">
+                        <div class="s-name">維納斯之愛</div>
+                        <div class="s-desc">關係鏡像：投射、真心與互動模型 (8張)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="spread-category">
+                <h3 class="cat-title">深度全觀</h3>
+                <div class="spread-grid">
+                    <button class="spread-btn" onclick="initiateRitual('celtic')" data-tags="deep confusion">
+                        <div class="s-name">賽爾特十字</div>
+                        <div class="s-desc">全息掃描：深度剖析事件的十個維度 (10張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('tree_of_life')" data-tags="deep">
+                        <div class="s-name">生命之樹</div>
+                        <div class="s-desc">靈魂藍圖：從靈性源頭到物質顯化 (10張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('astrological')" data-tags="deep">
+                        <div class="s-name">占星宮位</div>
+                        <div class="s-desc">命盤掃描：人生十二領域的能量檢測 (12張)</div>
+                    </button>
+                    <button class="spread-btn" onclick="initiateRitual('yearly')" data-tags="deep">
+                        <div class="s-name">年度運勢</div>
+                        <div class="s-desc">流年預覽：十二個月份的時間軌跡 (13張)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="spread-category">
+                 <h3 class="cat-title">自由模式</h3>
+                 <div class="option-card" id="custom-option-card" style="width: 100%; max-width: 300px; height: auto; padding: 15px; margin: 0 auto;">
+                    <div style="margin-bottom: 5px;">∞ 自由直覺抽牌</div>
+                    <div id="slider-val" style="color: var(--text-gold); font-size: 1.2rem; margin: 2px 0;">1</div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="78" value="1" oninput="updateSlider(this.value)">
+                    </div>
+                    <button class="custom-btn" onclick="initiateRitual('custom')">確認張數</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="phase-breath" class="phase-container">
+        <div class="breath-wrapper">
+            <div class="breathing-light"></div>
+            <div class="meditate-text">深呼吸，感受當下的能量...</div>
+            <button class="skip-btn" onclick="skipBreathing()">跳過儀式</button>
+        </div>
+    </div>
+
+    <div id="phase-reveal" class="phase-container">
+        <h2 style="color: var(--text-gold); font-weight: 300;" id="result-title">完成</h2>
+        <div class="instruction-text" id="hint-text">👇 點擊觸摸卡牌 👇</div>
+        
+        <div class="cards-container" id="board"></div>
+        <div id="supplement-area" class="supplement-container"></div>
+
+        <div id="result-panel" class="result-actions">
+            <h3 style="color: var(--text-gold);">解構結果</h3>
+            <div id="result-desc"></div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" onclick="addSupplementCard()">🎴 再補一張</button>
+                <button class="btn" onclick="copyPrompt()">📋 複製結果前往 Gemini</button>
+            </div>
+            
+            <button class="btn" style="border:none; font-size:0.8rem; margin-top:15px;" onclick="location.reload()">重新占卜</button>
+        </div>
+    </div>
+
+    <textarea id="hidden-prompt" style="position:fixed; left:-9999px;"></textarea>
+
+<script src="main.js"></script>
+</body>
+</html>
